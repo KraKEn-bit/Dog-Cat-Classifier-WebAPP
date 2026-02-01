@@ -1,226 +1,126 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+import streamlit as st
 import numpy as np
+import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 from PIL import Image
 import io
-import os
-from typing import Optional
-import uvicorn
 
-# Pydantic models for API responses
-class PredictionResponse(BaseModel):
-    prediction: str
-    confidence: float
-    raw_score: float
+# --- CONFIGURATION & THEME ---
+st.set_page_config(page_title="PetScan AI", page_icon="🐾", layout="wide")
 
-class ErrorResponse(BaseModel):
-    error: str
-    detail: Optional[str] = None
-
-# FastAPI app instance
-app = FastAPI(
-    title="Dog/Cat Image Classifier",
-    description="API for classifying images as containing dogs or cats",
-    version="1.0.0"
-)
-
-# Global variable to store the loaded model
-model = None
-MODEL_PATH = "dog_cat_final_model.keras"  # Default model path
-
-@app.on_event("startup")
-async def load_ml_model():
-    """Load the model on application startup"""
-    global model
-    try:
-        if not os.path.exists(MODEL_PATH):
-            print(f"Warning: Model file '{MODEL_PATH}' not found. Please place your model file in the same directory.")
-            return
-        
-        print(f"Loading model from {MODEL_PATH}...")
-        model = load_model(MODEL_PATH)
-        print("Model loaded successfully!")
-    except Exception as e:
-        print(f"Error loading model: {e}")
-        model = None
-
-def preprocess_image(img: Image.Image) -> np.ndarray:
-    """
-    Preprocess the image for prediction
-    
-    Args:
-        img: PIL Image object
-        
-    Returns:
-        Preprocessed image array
-    """
-    # Convert to RGB if necessary (handles RGBA, grayscale, etc.)
-    if img.mode != 'RGB':
-        img = img.convert('RGB')
-    
-    # Resize to expected input size
-    img = img.resize((128, 128))
-    
-    # Convert to array and normalize
-    img_array = image.img_to_array(img) / 255.0
-    
-    # Add batch dimension
-    img_array = np.expand_dims(img_array, axis=0)
-    
-    return img_array
-
-@app.get("/")
-async def root():
-    """Root endpoint with API information"""
-    return {
-        "message": "Dog/Cat Image Classifier API",
-        "endpoints": {
-            "/predict": "POST - Upload an image for classification",
-            "/health": "GET - Check API health status",
-            "/docs": "GET - Interactive API documentation"
-        }
+# Custom CSS for a sleek, modern look
+st.markdown("""
+    <style>
+    /* Main background */
+    .stApp {
+        background-color: #0e1117;
     }
-
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    model_status = "loaded" if model is not None else "not_loaded"
-    return {
-        "status": "healthy",
-        "model_status": model_status
+    /* Sleek cards for results */
+    .prediction-card {
+        background-color: #161b22;
+        padding: 2rem;
+        border-radius: 15px;
+        border: 1px solid #30363d;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        text-align: center;
     }
+    .status-online {
+        color: #238636;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    /* Glowing button effect */
+    .stButton>button {
+        width: 100%;
+        background-image: linear-gradient(to right, #1f6feb, #111);
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 8px;
+        transition: 0.3s;
+    }
+    .stButton>button:hover {
+        box-shadow: 0 0 15px #1f6feb;
+        transform: translateY(-2px);
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-@app.post("/predict", response_model=PredictionResponse)
-async def predict_image(file: UploadFile = File(...)):
-    """
-    Predict if an uploaded image contains a dog or cat
+# --- SIDEBAR: SYSTEM STATS ---
+with st.sidebar:
+    st.title("🐾 PetScan AI")
+    st.markdown("---")
+    st.header("📍 How to use")
+    st.info("Upload any image of a cat or dog. Our Neural Network will analyze the features to determine the species.")
     
-    Args:
-        file: Uploaded image file
-        
-    Returns:
-        Prediction result with confidence score
-    """
-    # Check if model is loaded
-    if model is None:
-        raise HTTPException(
-            status_code=503, 
-            detail="Model not loaded. Please check server logs and ensure model file exists."
-        )
+    st.header("🛠️ Specs")
+    st.write("**Model:** Custom CNN")
+    st.write("**Backend:** TensorFlow 2.16+")
+    st.write("**Input Size:** 128x128px")
     
-    # Validate file type
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(
-            status_code=400,
-            detail="File must be an image"
-        )
-    
-    try:
-        # Read image file
-        image_data = await file.read()
-        img = Image.open(io.BytesIO(image_data))
-        
-        # Preprocess image
-        img_array = preprocess_image(img)
-        
-        # Make prediction
-        raw_prediction = model.predict(img_array)[0][0]
-        
-        # Interpret results
-        if raw_prediction > 0.5:
-            prediction = "DOG"
-            confidence = float(raw_prediction)
-        else:
-            prediction = "CAT"
-            confidence = float(1 - raw_prediction)
-        
-        return PredictionResponse(
-            prediction=prediction,
-            confidence=round(confidence, 4),
-            raw_score=round(float(raw_prediction), 4)
-        )
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error during prediction: {str(e)}"
-        )
+    st.header("👤 Author")
+    st.caption("Developed by Rafsan Kabir")
 
-@app.post("/predict-batch")
-async def predict_batch(files: list[UploadFile] = File(...)):
-    """
-    Predict multiple images at once
-    
-    Args:
-        files: List of uploaded image files
-        
-    Returns:
-        List of prediction results
-    """
-    if model is None:
-        raise HTTPException(
-            status_code=503,
-            detail="Model not loaded. Please check server logs and ensure model file exists."
-        )
-    
-    if len(files) > 10:  # Limit batch size
-        raise HTTPException(
-            status_code=400,
-            detail="Maximum 10 files allowed per batch"
-        )
-    
-    results = []
-    
-    for i, file in enumerate(files):
-        try:
-            # Validate file type
-            if not file.content_type.startswith("image/"):
-                results.append({
-                    "filename": file.filename,
-                    "error": "File must be an image"
-                })
-                continue
-            
-            # Read and process image
-            image_data = await file.read()
-            img = Image.open(io.BytesIO(image_data))
-            img_array = preprocess_image(img)
-            
-            # Make prediction
-            raw_prediction = model.predict(img_array)[0][0]
-            
-            # Interpret results
-            if raw_prediction > 0.5:
-                prediction = "DOG"
-                confidence = float(raw_prediction)
-            else:
-                prediction = "CAT"
-                confidence = float(1 - raw_prediction)
-            
-            results.append({
-                "filename": file.filename,
-                "prediction": prediction,
-                "confidence": round(confidence, 4),
-                "raw_score": round(float(raw_prediction), 4)
-            })
-            
-        except Exception as e:
-            results.append({
-                "filename": file.filename,
-                "error": f"Error processing image: {str(e)}"
-            })
-    
-    return {"results": results}
+# --- MAIN INTERFACE ---
+st.title("Neural Vision: Dog vs Cat Classifier")
+st.write("Experience the power of Deep Learning in real-time.")
 
-# Configuration for running the server
-if __name__ == "__main__":
-    # You can customize these settings
-    uvicorn.run(
-        "main:app",  # Change "main" to your filename if different
-        host="0.0.0.0",
-        port=8000,
-        reload=True  # Set to False in production
-    )
+# Load the model with error handling
+@st.cache_resource
+def load_classification_model():
+    # Make sure this matches your new 'fixed' filename
+    return load_model('dog_cat_fixed.keras')
+
+try:
+    model = load_classification_model()
+    st.markdown('<p class="status-online">● SYSTEM STATUS: NEURAL ENGINE ONLINE</p>', unsafe_allow_html=True)
+except Exception as e:
+    st.error(f"Engine Failure: {e}")
+
+# Creating a Two-Column Layout for Input vs Intelligence
+col_input, col_output = st.columns([1, 1], gap="large")
+
+with col_input:
+    st.subheader("📁 Image Input")
+    uploaded_file = st.file_uploader("Drop your image file here", type=["jpg", "jpeg", "png"])
+    
+    if uploaded_file:
+        img = Image.open(uploaded_file)
+        st.image(img, caption="Analyzed Specimen", use_container_width=True)
+
+with col_output:
+    st.subheader("🧠 Intelligence Output")
+    
+    if uploaded_file is not None:
+        # Preprocessing
+        img_resized = img.resize((128, 128))
+        img_array = image.img_to_array(img_resized) / 255.0
+        img_array = np.expand_dims(img_array, axis=0)
+        
+        if st.button("EXECUTE CLASSIFICATION"):
+            with st.spinner('Neural Network processing...'):
+                prediction = model.predict(img_array)[0][0]
+                
+                # Determine Label
+                label = "DOG" if prediction > 0.5 else "CAT"
+                confidence = prediction if prediction > 0.5 else 1 - prediction
+                icon = "🐶" if label == "DOG" else "🐱"
+                
+                # Result Display
+                st.markdown(f"""
+                    <div class="prediction-card">
+                        <h2 style="color: #1f6feb;">{icon} {label} DETECTED</h2>
+                        <p style="font-size: 1.5rem;">Confidence Score: <b>{confidence*100:.2f}%</b></p>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                # Metrics and Charts
+                st.write("---")
+                m1, m2 = st.columns(2)
+                m1.metric("Dog Likelihood", f"{prediction*100:.1f}%")
+                m2.metric("Cat Likelihood", f"{(1-prediction)*100:.1f}%")
+                
+                st.bar_chart({"Probability": [1-prediction, prediction]}, x=["Cat", "Dog"])
+    else:
+        st.info("Waiting for image input to begin analysis...")
