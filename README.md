@@ -5,7 +5,12 @@ A **high-performance image classification system** upgraded to **Keras 3.0**, de
 This project features a **professional, laboratory-grade cyber interface**, optimized inference, and both **web and API access**, making it suitable for research demos, ML portfolios, and real-world integration.
 
 ---
+<br>
 
+![image](https://github.com/KraKEn-bit/Dog-Cat-Classifier-WebAPP/blob/main/licensed-image.jpeg)
+
+<br>
+<br>
 ##  Technical Upgrades — *Rafsan’s Edition*
 
 ###  Keras 3.0 Migration
