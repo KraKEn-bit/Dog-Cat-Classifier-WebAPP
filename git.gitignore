@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+.idea/
+.vscode/
+.keras/
+data/
+dataset/
+*.zip
+*.keras
+!dog_cat_fixed.keras
