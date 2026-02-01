@@ -68,16 +68,17 @@ with st.sidebar:
     st.header("📍 How to use")
     st.info("Upload any image of a cat or dog. Our Neural Network will analyze the features to determine the species.")
     
-    st.header("🛠️ Specs")
+    st.header("My Model's Specs:")
     st.write("**Model:** Custom CNN")
     st.write("**Backend:** TensorFlow 2.16+")
     st.write("**Input Size:** 128x128px")
     
     st.header("👤 Author")
-    st.caption("Developed by Rafsan Kabir")
+    st.caption("Developed by Rafsan Kabir Taaseen")
+    st.caption("CSE , IUT")
 
 # --- MAIN INTERFACE ---
-st.title("Neural Vision: Dog vs Cat Classifier")
+st.title("Rafsan's Neural Vision: Dog vs Cat Classifier")
 st.write("Experience the power of Deep Learning in real-time.")
 
 # Load the model with error handling
