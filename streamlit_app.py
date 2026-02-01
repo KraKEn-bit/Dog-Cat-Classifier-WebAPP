@@ -4,34 +4,45 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 from PIL import Image
+import base64
 import io
 
 # --- CONFIGURATION & THEME ---
 st.set_page_config(page_title="PetScan AI", page_icon="🐾", layout="wide")
 
-# Custom CSS for a sleek, modern look
-st.markdown("""
+# Function to encode the PAWS image for CSS
+def get_base64(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+# Custom CSS for Background and UI
+try:
+    # Subtly integrate PAWS.webp with a dark overlay
+    img_b64 = get_base64('PAWS.webp')
+    bg_style = f"""
     <style>
-    /* Main background */
-    .stApp {
-        background-color: #0e1117;
-    }
-    /* Sleek cards for results */
-    .prediction-card {
+    .stApp {{
+        background: linear-gradient(rgba(14, 17, 23, 0.92), rgba(14, 17, 23, 0.92)), 
+                    url("data:image/webp;base64,{img_b64}");
+        background-size: 350px;
+        background-attachment: fixed;
+    }}
+    /* Maintain your original sleek cards and buttons */
+    .prediction-card {{
         background-color: #161b22;
         padding: 2rem;
         border-radius: 15px;
         border: 1px solid #30363d;
         box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         text-align: center;
-    }
-    .status-online {
+    }}
+    .status-online {{
         color: #238636;
         font-weight: bold;
         font-size: 0.9rem;
-    }
-    /* Glowing button effect */
-    .stButton>button {
+    }}
+    .stButton>button {{
         width: 100%;
         background-image: linear-gradient(to right, #1f6feb, #111);
         color: white;
@@ -39,13 +50,16 @@ st.markdown("""
         padding: 0.75rem;
         border-radius: 8px;
         transition: 0.3s;
-    }
-    .stButton>button:hover {
+    }}
+    .stButton>button:hover {{
         box-shadow: 0 0 15px #1f6feb;
         transform: translateY(-2px);
-    }
+    }}
     </style>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(bg_style, unsafe_allow_html=True)
+except Exception:
+    st.markdown("<style>.stApp {background-color: #0e1117;}</style>", unsafe_allow_html=True)
 
 # --- SIDEBAR: SYSTEM STATS ---
 with st.sidebar:
@@ -69,7 +83,6 @@ st.write("Experience the power of Deep Learning in real-time.")
 # Load the model with error handling
 @st.cache_resource
 def load_classification_model():
-    # Make sure this matches your new 'fixed' filename
     return load_model('dog_cat_fixed.keras')
 
 try:
@@ -87,7 +100,8 @@ with col_input:
     
     if uploaded_file:
         img = Image.open(uploaded_file)
-        st.image(img, caption="Analyzed Specimen", use_container_width=True)
+        # Update for 2026 compatibility
+        st.image(img, caption="Analyzed Specimen", width="stretch")
 
 with col_output:
     st.subheader("🧠 Intelligence Output")
@@ -121,6 +135,11 @@ with col_output:
                 m1.metric("Dog Likelihood", f"{prediction*100:.1f}%")
                 m2.metric("Cat Likelihood", f"{(1-prediction)*100:.1f}%")
                 
-                st.bar_chart({"Probability": [1-prediction, prediction]}, x=["Cat", "Dog"])
+                # FIX: Corrected bar_chart data structure
+                chart_data = {
+                    "Class": ["Cat", "Dog"],
+                    "Probability": [float(1 - prediction), float(prediction)]
+                }
+                st.bar_chart(chart_data, x="Class", y="Probability")
     else:
         st.info("Waiting for image input to begin analysis...")
