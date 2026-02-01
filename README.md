@@ -87,5 +87,9 @@ Launch the high-tech web interface:
 streamlit run streamlit_app.py
 ```
 
+---
 
+# **Here's a Demo of How my App will run and look like:**
+
+![PetDetection GIF](https://github.com/KraKEn-bit/Dog-Cat-Classifier-WebAPP/blob/main/PetDetection-gif.gif)
 
