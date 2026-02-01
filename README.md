@@ -1,104 +1,92 @@
-# 🐱 Dog vs Cat Classifier 🐶
+# 🧬 Neural Vision: Dog vs Cat Classifier (Pro)
 
-A simple yet powerful image classification application that can distinguish between dogs and cats using a Convolutional Neural Network (CNN) built with TensorFlow/Keras.
+A **high-performance image classification system** upgraded to **Keras 3.0**, designed to distinguish between **canine and feline specimens** using a deep **Convolutional Neural Network (CNN)**.
+
+This project features a **professional, laboratory-grade cyber interface**, optimized inference, and both **web and API access**, making it suitable for research demos, ML portfolios, and real-world integration.
+
+---
+
+## 🚀 Technical Upgrades — *Rafsan’s Edition*
+
+### 🔁 Keras 3.0 Migration
+- Fully refactored to support **TensorFlow / Keras 2.16+**
+- Resolved legacy `batch_input_shape` serialization issues
+- Re-linked model weights to a **native Keras 3 architecture**
+
+### 🧠 Neural Engine Optimization
+- Faster inference with optimized model loading
+- Clean separation between preprocessing, inference, and UI layers
+
+### 🧪 Cyber-Lab Interface
+- Complete UI overhaul with **Glassmorphism**
+- Monospace typography for a **research console aesthetic**
+- Animated scanning effects and real-time prediction feedback
+
+### 📊 Dynamic Analysis Matrix
+- Real-time probability tracking
+- Automated “scanning” animation during inference
+
+---
 
 ## ✨ Features
 
-- 🖼️ Upload and classify images of dogs and cats
-- 📊 View prediction confidence with visual indicators
-- 🧠 Trained CNN model with good accuracy
-- 🖥️ Streamlit web interface for easy interaction
-- 📝 Command-line interface for inferencing
+- **Advanced UI**
+  - Side-by-side input/output console
+  - Subtle textured backgrounds for depth
+- **Cross-Platform**
+  - Optimized for **Python 3.10+**
+- **Dual Access Modes**
+  - 🌐 Streamlit Web Dashboard (users)
+  - ⚙️ CLI / API Backend (engineers)
+- **Automated Preprocessing**
+  - Real-time image resizing to **128×128**
+  - Normalization for CNN compatibility
+
+---
 
 ## 🛠️ Installation
 
-### Prerequisites
+### 📌 Prerequisites
+- Python **3.10+**
+- Virtual Environment (**recommended**)
 
-- Python 3.8+ installed
-- pip package manager
+---
 
-### Option 1: Standard Installation
+### 🔧 Setup Instructions
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/yourusername/dog-cat-classifier.git
-   cd dog-cat-classifier
-   ```
+#### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/KraKEn-bit/Dog-Cat-Classifier-WebAPP.git
+cd Dog-Cat-Classifier-WebAPP
+```
 
-2. Install required packages:
-   ```bash
-   pip install -r requirements.txt
-   ```
 
-### Option 2: Using Conda (for Apple Silicon M1/M2)
+# **Create & Activate Virtual Environment:**
+```bash
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
 
-1. Create a conda environment using the provided YAML file:
-   ```bash
-   conda env create -n dogcat python==3.11 -y
-   conda activate dogcat
-   ```
 
-2. Install additional requirements:
-   ```bash
-   pip install -r requirements.txt
-   ```
+# **Install Dependencies:**
+```bash
+pip install -r requirements.txt
+```
 
-## 🚀 Usage
 
-### Web Interface
+## **Cyber-Lab Dashboard (Streamlit):**
 
-Run the Streamlit app:
+Launch the high-tech web interface:
 ```bash
 streamlit run streamlit_app.py
 ```
 
-Then open your browser and navigate to the URL shown in the terminal (typically http://localhost:8501).
 
-### Command Line Interface
-
-For quick predictions without the web interface:
-```bash
-python cli.py path/to/your/image.jpg
-```
-
-Optional arguments:
-- `--model`: Specify a different model file (default: dog_cat_cnn_model.h5)
-
-Example:
-```bash
-python cli.py samples/my_cat.jpg --model models/custom_model.h5
-```
-
-## 🧪 Model Training
-
-The model was trained on a dataset of dog and cat images. The training process is documented in `training_a_cnn_with_custom_dataset_keras.py`.
-
-Key model architecture:
-- Input: 128x128 RGB images
-- 3 convolutional layers with max pooling
-- Dense layers with dropout for regularization
-- Binary classification output (dog or cat)
-
-## 📁 Project Structure
-
-```
+# **Project Structure:**
 dog-cat-classifier/
-├── streamlit_app.py        # Web interface
-├── cli.py        # Command line tool
-├── dog_cat_cnn_model.h5    # Trained model
-├── requirements.txt        # Python dependencies
-└── README.md               # This file
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🙏 Acknowledgements
-
-- Dataset from Kaggle's Dogs vs Cats competition
-- Built with TensorFlow and Streamlit
+├── streamlit_app.py      # Cyber-Lab Streamlit UI
+├── webapp.py             # FastAPI Backend Implementation
+├── rebuild_model.py      # Keras 3 Migration Engine
+├── dog_cat_fixed.keras   # Optimized Keras 3 Model Weights
+├── PAWS.webp             # UI Background Texture Asset
+└── README.md             # Project Documentation
