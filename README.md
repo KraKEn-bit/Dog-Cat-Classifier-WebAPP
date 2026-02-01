@@ -12,7 +12,7 @@ This project features a **professional, laboratory-grade cyber interface**, opti
 <br>
 <br>
 
-##  **Technical Upgrades — *Rafsan’s Edition**
+## **Technical Upgrades — *Rafsan’s Edition**
 
 ###  Keras 3.0 Migration
 - Fully refactored to support **TensorFlow / Keras 2.16+**
